@@ -1,0 +1,171 @@
+{%extends 'task_management/base.html'%}
+{%block content%}
+<style>
+</style>
+<div class="container">
+	<div class="row main">
+		<div class="col-md-5"></div>
+		<div class="col-md-6"></div>
+		<div class="col-md-1">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Add Task</button>
+		</div>	
+	</div>
+	<div class="row table-wrap">
+		<table class="table table-bordered">
+  			<thead>
+    			<tr>
+              <th style="display:none;">Task Id</th>
+      				<th scope="col">Task Name</th>
+      				<th scope="col">Task Description</th>
+      				<th scope="col">Status</th>
+              <th scope="col">Update</th>
+              <th scope="col">Delete</th>
+              <th scope="col">Complete</th>
+    			</tr>
+  			</thead>
+  			<tbody id="table-body">
+  			</tbody>
+		</table>
+	</div>
+</div>
+
+{% include "task_management/create_task.html" %}
+
+{% include "task_management/update_task.html" %}
+
+
+<script>
+// Function to send data to api
+function loadData(method,request_url,userData = {}){
+    $.ajax({
+        type: method,
+        url: request_url,
+        data: userData,
+        headers:{"X-CSRFToken": "{{csrf_token}}"},
+        success: function (data) {
+          if (method == "GET"){
+            $("#table-body").html("");
+            for (index = 0; index < data.length; index++) { 
+              if (data[index].status == 0){
+                var status = "Incomplete"
+                var complete_button = "<button type='button' onclick='complete_function(this)' class='btn btn-success btn-sm'>Mark Complete</button>"
+              }
+              else{
+                var status = "Completed"
+                var complete_button = "<button type='button' class='btn btn-secondary btn-sm' disabled>Completed</button>"
+              }
+              $('#table-body').append(
+                `<tr>`+
+                  "<td style='display:none'>"+data[index].id+"</td>"+
+                  "<td>"+data[index].task_name+"</td>"+
+                  "<td>"+data[index].task_description+"</td>"+
+                  "<td>"+status+"</td>"+
+                  "<td><a onclick='update_task(this);' style='cursor:pointer;'><i class='material-icons'>update</i></a></td>"+
+                  "<td><a onclick='delete_task(this);' style='cursor:pointer;'><i class='material-icons'>delete_forever</i></a></td>"+
+                  "<td>"+complete_button+"</td>"
+                +`</tr>`
+              );
+            }
+          } 
+      }
+  });
+ }
+//End of the function 
+
+
+//Load data on window load
+$( window ).on("load", function(){ 
+	 loadData('GET','../task_list');
+});
+// End of the function
+
+
+// gets call on adding task
+$('#save-data').click(function(){
+  var username =  $('#username').val();
+  var task_name = $('#task_name').val();
+  var task_description = $('#task_description').val();
+  var userId = "{{user_id}}" 
+
+  if (username && task_name && task_description){
+    user_data = {  
+
+            "username": userId,
+            "task_name": task_name,
+            "task_description": task_description,
+    }
+    loadData("POST",'../task_list/',user_data);
+    $('#exampleModal').modal('toggle');
+    // loadData('GET','../task_list');
+    location.reload();
+  }
+  else{
+    $('#save-data-alert').css('display','block');
+  }
+});
+// End of the function
+
+
+// Gets call to add data to the update form
+function update_task(current_object){
+  var task_id = current_object.parentElement.parentElement.children[0].innerText;
+  var task_name = current_object.parentElement.parentElement.children[1].innerText;
+  var task_description = current_object.parentElement.parentElement.children[2].innerText;
+  $("#update_task_name").val(task_name);
+  $("#update_task_description").val(task_description);
+  $('#update_id').val(task_id);
+  $('#UpdateModel').modal('toggle');
+}
+// End of the function
+
+
+// Gets call on update task details
+$('#update-data').click(function(){
+  var task_id = $('#update_id').val();
+  var username = $('#username').val();
+  var task_name = $('#update_task_name').val();
+  var task_description = $('#update_task_description').val();
+  var userId = "{{user_id}}" 
+
+  if (username && task_name && task_description && task_id && userId){
+  update_data = {
+        "id": task_id,
+        "username": userId,
+        "task_name": task_name,
+        "task_description": task_description,
+  }
+  loadData('PUT','../task_list/'+task_id+'/',update_data);
+  $('#UpdateModel').modal('toggle');
+  // loadData('GET','../task_list');
+  location.reload();
+}
+else{
+  $('#update-data-alert').css('display','block'); 
+}
+});
+// End of the function
+
+function delete_task(current_object){
+  var task_id = current_object.parentElement.parentElement.children[0].innerText;
+  loadData('DELETE','../task_list/'+task_id+'/');
+  loadData('GET','../task_list');
+}
+
+function complete_function(current_object){
+  var task_id = current_object.parentElement.parentElement.children[0].innerText;
+  var task_name = current_object.parentElement.parentElement.children[1].innerText;
+  var task_description = current_object.parentElement.parentElement.children[2].innerText;
+  var userId = "{{user_id}}" 
+  update_data = {
+        "id": task_id,
+        "username": userId,
+        "task_name":task_name,
+        "task_description":task_description,
+        "status":1
+  }
+  loadData('PUT','../task_list/'+task_id+'/',update_data);
+  // loadData('GET','../task_list');
+  location.reload();
+}
+</script>
+{%endblock%}

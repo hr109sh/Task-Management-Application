@@ -1,0 +1,24 @@
+{%extends 'task_management/base.html'%}
+{%block content%}
+<div class="container">
+  <div class="row" style="margin-top:11%;">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+      <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <form class="form-signin" method="post">
+        {% csrf_token %}
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="text" name="username" class="form-control" placeholder="Email address" autofocus="" maxlength="254" required="" id="id_username"><br>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Password" required="" id="id_password"><br>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4"></div>
+  </div>
+</div>
+{%endblock%}

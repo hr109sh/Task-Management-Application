@@ -1,0 +1,19 @@
+.table-wrap {
+  		height: 30rem;
+  		overflow-y: auto;
+}
+
+.table-wrap thead th { 
+	position: sticky; 
+	top: 0; 
+}
+th, td { 
+	padding: 8px 16px; 
+}
+th{ 
+	background:#eee; border:none;
+}
+
+.main{
+	margin: 7px 0px 7px 0px;
+}
